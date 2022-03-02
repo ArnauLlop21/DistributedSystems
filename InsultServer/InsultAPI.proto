@@ -1,0 +1,10 @@
+syntax = "proto3";
+//python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./InsultAPI.proto
+message Insults {
+    repeated string list = 1;
+    string listed = 2;
+}
+
+service InsultAPI {
+    rpc getInsults(Insults) returns (Insults) {}
+}
