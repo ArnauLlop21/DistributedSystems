@@ -16,8 +16,18 @@ class InsultAPIStub(object):
         """
         self.getInsults = channel.unary_unary(
                 '/InsultAPI/getInsults',
-                request_serializer=InsultAPI__pb2.Insults.SerializeToString,
-                response_deserializer=InsultAPI__pb2.Insults.FromString,
+                request_serializer=InsultAPI__pb2.Request.SerializeToString,
+                response_deserializer=InsultAPI__pb2.InsultListMessage.FromString,
+                )
+        self.insultme = channel.unary_unary(
+                '/InsultAPI/insultme',
+                request_serializer=InsultAPI__pb2.Request.SerializeToString,
+                response_deserializer=InsultAPI__pb2.RandInsultMessage.FromString,
+                )
+        self.addInsult = channel.unary_unary(
+                '/InsultAPI/addInsult',
+                request_serializer=InsultAPI__pb2.Request.SerializeToString,
+                response_deserializer=InsultAPI__pb2.RandInsultMessage.FromString,
                 )
 
 
@@ -30,13 +40,35 @@ class InsultAPIServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def insultme(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def addInsult(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_InsultAPIServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'getInsults': grpc.unary_unary_rpc_method_handler(
                     servicer.getInsults,
-                    request_deserializer=InsultAPI__pb2.Insults.FromString,
-                    response_serializer=InsultAPI__pb2.Insults.SerializeToString,
+                    request_deserializer=InsultAPI__pb2.Request.FromString,
+                    response_serializer=InsultAPI__pb2.InsultListMessage.SerializeToString,
+            ),
+            'insultme': grpc.unary_unary_rpc_method_handler(
+                    servicer.insultme,
+                    request_deserializer=InsultAPI__pb2.Request.FromString,
+                    response_serializer=InsultAPI__pb2.RandInsultMessage.SerializeToString,
+            ),
+            'addInsult': grpc.unary_unary_rpc_method_handler(
+                    servicer.addInsult,
+                    request_deserializer=InsultAPI__pb2.Request.FromString,
+                    response_serializer=InsultAPI__pb2.RandInsultMessage.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -60,7 +92,41 @@ class InsultAPI(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/InsultAPI/getInsults',
-            InsultAPI__pb2.Insults.SerializeToString,
-            InsultAPI__pb2.Insults.FromString,
+            InsultAPI__pb2.Request.SerializeToString,
+            InsultAPI__pb2.InsultListMessage.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def insultme(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/InsultAPI/insultme',
+            InsultAPI__pb2.Request.SerializeToString,
+            InsultAPI__pb2.RandInsultMessage.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def addInsult(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/InsultAPI/addInsult',
+            InsultAPI__pb2.Request.SerializeToString,
+            InsultAPI__pb2.RandInsultMessage.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

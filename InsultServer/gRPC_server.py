@@ -1,5 +1,7 @@
 # pip install grpcio
 # pip install grpcio-tools
+from email import message
+from unicodedata import name
 from urllib import response
 import grpc
 from concurrent import futures
@@ -20,17 +22,18 @@ class insultsAPI(InsultAPI_pb2_grpc.InsultAPIServicer):
         insultFile.close()
 
     def getInsults(self, request, context):
-        return InsultAPI_pb2.Insults(list=insultsAPI.insultList)
+        return InsultAPI_pb2.InsultListMessage(list=insultsAPI.insultList)
     
-    def insultme(self):
-        return (insultsAPI.insultList[random.randint(0, len(insultsAPI.insultList)-1)])
+    def insultme(self, request, context):
+        return InsultAPI_pb2.RandInsultMessage(message=insultsAPI.insultList[random.randint(0, len(insultsAPI.insultList)-1)])
 
-    def addInsult(self, newInsult):
-        insultsAPI.insultList.append(newInsult)
+    def addInsult(self, request, context):
+        insultsAPI.insultList.append(str(request.requestName))
         insultFile = open("InsultList.txt", 'a')
         insultFile.write("\n")
-        insultFile.write(newInsult)
+        insultFile.write(str(request.requestName))
         insultFile.close()
+        return InsultAPI_pb2.RandInsultMessage(message=("Insult added! "+str(request.requestName)))
 
 # create a gRPC server
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
