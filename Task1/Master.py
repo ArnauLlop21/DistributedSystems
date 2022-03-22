@@ -16,5 +16,5 @@ class Master:
     def listServants(self):
         aux = []
         for serve in self.listedServants:
-            aux.append(serve.getFileName())
+            aux.append(serve)
         return aux
