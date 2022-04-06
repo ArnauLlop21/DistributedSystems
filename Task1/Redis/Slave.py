@@ -28,4 +28,7 @@ def addSlave(name):
 
 
 if __name__ == '__main__':
+    master.set("Workers", 0)
     slave("Slave0")
+    slave("Slave1")
+    slave("Slave2")

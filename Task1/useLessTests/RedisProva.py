@@ -1,5 +1,6 @@
 import redis
 import json
+import time
 
 redis_host = 'localhost'
 redis_port = 6379
@@ -70,10 +71,11 @@ def provaPubSub():
         redis_client = redis.Redis(host='localhost',port=6379, decode_responses=True)
         pubsub = redis_client.pubsub()
         pubsub.subscribe('Taulell1')
+        time.sleep(1)
         prova = {"titanic.csv","min"}
-        redis_client.publish('Taulell1', "HOLA")
-        redis_client.publish('Taulell1', "Valor2")
-        print(pubsub.get_message())
+        #redis_client.publish('Taulell1', "HOLA")
+        #redis_client.publish('Taulell1', "Valor2")
+        redis_client.publish('Taulell1', "PubSubhaha")
         print(pubsub.get_message())
         print(pubsub.get_message())
 
