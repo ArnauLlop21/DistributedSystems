@@ -3,7 +3,7 @@ from xmlrpc.client import ServerProxy
 from xmlrpc.server import SimpleXMLRPCServer
 import pandas as pd
 
-port = 9000
+port = 9001
 
 # Set up logging
 worker = SimpleXMLRPCServer(('localhost', port), logRequests=True, allow_none=True)
@@ -15,15 +15,15 @@ master = ServerProxy('http://localhost:8000', allow_none=True)
 def read_csv(file):
     global df
     df = pd.read_csv(file)
-
-def apply(func):
-    return df.apply(func).values.tolist()
+#func casting string to server -> eval()
+def apply(cond):
+    return df.apply(eval(cond)).values.tolist()
 
 def columns():
     return df.columns.values.tolist()
 
 def groupby(by):
-    return df.groupby(by).values.tolist()
+    return df.groupby(by).agg(['mean', 'count']).values.tolist()
 
 def head(n):
     return df.head(n).values.tolist()
@@ -32,10 +32,14 @@ def isin(val):
     return df.isin(val).values.tolist()
 
 def items():
-    return df.items().values.tolist()
+    aux=[]
+    for label, content in df.items():
+        aux.append(f'label:' + str(label))
+        aux.append(f'content:' + str(content))
+    return aux
 
-def max(axis):
-    return df.max(axis).values.tolist()
+def max():
+    return df.max().values.tolist()
 
 def min(axis):
     return df.min(axis).values.tolist()
@@ -56,4 +60,5 @@ try:
     master.add_node('http://localhost:'+str(port))
     worker.serve_forever()
 except KeyboardInterrupt:
+    master.remove_node('http://localhost:'+str(port))
     print('Exiting')
