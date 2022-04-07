@@ -38,11 +38,11 @@ def items():
         aux.append(f'content:' + str(content))
     return aux
 
-def max():
-    return df.max().values.tolist()
+def max(axis):
+    return str(df[axis].max())
 
 def min(axis):
-    return df.min(axis).values.tolist()
+    return str(df[axis].min())
 
 worker.register_function(read_csv)
 worker.register_function(apply)
