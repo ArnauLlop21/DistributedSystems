@@ -1,12 +1,11 @@
 import redis
-import time
 import pandas as pd
 import RedisOpt as ro
 
 redis_host = 'localhost'
 redis_port = 6379
 master = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
-pubsub=master.pubsub()
+pubsubS=master.pubsub()
 def slave():
     registerNewSlave()
     subscribeToMaster()
@@ -17,33 +16,25 @@ def registerNewSlave():
     master.set("Workers", workers+1)        # Increments the number of slaves on the server to increase the information recieved by the client
 
 def subscribeToMaster():
-    pubsub.subscribe("Board")               # Applies pubsub to the Board we want to subscribe to
+    pubsubS.subscribe("Board")               # Applies pubsub to the Board we want to subscribe to
 
-""" def listenToBoard():
-    while True:
-        message=pubsub.get_message()
-        time.sleep(2)
-        if message and message['type'] != 'subscribe':
-            print(message) """
-def listenToBoard():
+def listenToBoard():                        # Method to retrieve the information from the publishing board the clients are talking them through
     i=0
-    for m in pubsub.listen():
+    for m in pubsubS.listen():
         if m and m['type'] != 'subscribe' :
-            petition=m['data']
-            #print(petition)
-            workInPanditas(petition)
+            fileTpl=tuple(map(str,m['data'].split(';')))
+            result=workInPanditas(fileTpl)
+            reportToSlaver(result,fileTpl[3])
 
-def workInPanditas(petition):
-    fileTpl=tuple(map(str,petition.split(';')))
-    filePet,optPet,parmPet=fileTpl
-    print(filePet)
-    print(optPet)
-    print(parmPet)
+def workInPanditas(fileTpl):                # Method to manage the data as the petition especified
+    filePet=fileTpl[0]
+    optPet=fileTpl[1]
+    parmPet=fileTpl[2]
     df=pd.read_csv(filePet)
     result=calculateSlave(df,optPet,parmPet)
-    print(result)
+    return result
 
-def calculateSlave(df,option,parameter):
+def calculateSlave(df,option,parameter):    # Pandas' methods
     if parameter == "null" :
         print("parameter null")
         if option == "columns":
@@ -67,8 +58,9 @@ def calculateSlave(df,option,parameter):
             return ro.min(df,parameter)
         else: return "Something went wrong"
 
+def reportToSlaver(info,board):                 # Method to inform our client about our results.
+    master.publish(str(board),info)
+
+
 if __name__ == '__main__':
-    master.set("Workers", 0)
     slave()
-#    slave()
-#    slave()

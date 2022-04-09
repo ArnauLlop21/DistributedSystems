@@ -82,9 +82,33 @@ def provaPubSub():
     except:
         print("AHPubsub")
 
+def provaTupla():
+    string="a;b;c;d;e"
+    strTupl=tuple(map(str,string.split(';')))
+    #a=strTupl.get(0)            # Not okay
+    a=strTupl[0]
+    b=strTupl[1]
+    c=strTupl[2]
+    d=strTupl[3]
+    e=strTupl[4]
+    print(a,b,c,d,e)      # Unpacking should go n to n.
+    a=a+"()"
+    print (a)
+    printProva="print(a)"
+    eval(printProva)
+    a="a"
+    b=["a","b"]
+    print(len(a))
+    print(len(b))
+    print(a[0])
+    redis_client = redis.Redis(host='localhost',port=6379, decode_responses=True)
+    print(redis_client.get("Workers"))
+
+
 if __name__ == '__main__':
     #redis_string()
     #redis_number()
     #provaInputPipe()
     #provaOutputPipe()
-    provaPubSub()
+    #provaPubSub()
+    provaTupla()

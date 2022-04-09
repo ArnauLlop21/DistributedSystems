@@ -1,8 +1,8 @@
 def apply(df, cond):
-    return df.apply(eval(cond))
+    return str(df.apply(eval(cond)))
 
 def columns(df):
-    return df.columns()
+    return str(df.columns())
 
 def groupby(df, param):
     par=list(param.split(","))
@@ -13,18 +13,18 @@ def head(df, number):
 
 def isin(df, value):
     val=list(value.split(","))
-    return df.isin(val)
+    return str(df.isin(val))
 
 def max(df, column):
-    return str(df[column].max())
+    return df[column].max()
 
 def min(df, column):
-    return str(df[column].min())
+    return df[column].min()
 
 def items(df):
     aux=[]
     for label, content in df.items():
         aux.append(f'label:' + str(label))
         aux.append(f'content:' + str(content))
-    return aux
+    return str(aux)
 
