@@ -2,29 +2,36 @@
 # Packages needed: PIKA
 # This version does not implement publish subscribe scheme. 
 # Use this code only as a tool to get further comprehension about rabbitMQ
-# This code is not, by anny matter, my propperty. 
+# This code is not, by anny matter, my property. 
 # Its been taken, with educational purposes, from the following video.
-# https://www.youtube.com/watch?v=kwQDpHcM4HM&list=PLalrWAGybpB-UHbRDhFsBgXJM1g6T4IvO&index=4
+# https://www.youtube.com/watch?v=hi8DjlcbN4A&list=PLalrWAGybpB-UHbRDhFsBgXJM1g6T4IvO&index=8
+# https://www.youtube.com/watch?v=jXBd0jP6EoE&list=PLalrWAGybpB-UHbRDhFsBgXJM1g6T4IvO&index=9
 
+# This version uses the competing worker scheme. NOT TO BE USED in the assignment.
+# Educational purposes
 
 import pika as pk
-
+import random as rd
+import time
 rmqHost='localhost'
 rmqPort=5672
-
-def on_message_recieve(ch, method, properties, body):
-    print(f"Recieved new message: {body}")
+queueBoard='letterbox'
 
 connection_parameters = pk.ConnectionParameters(rmqHost,rmqPort)
 connection = pk.BlockingConnection(connection_parameters)
 channel = connection.channel()
 
-# It is mostly okay to declare the same queue more than once 
-# as rabbitmq will only execute the first instance of it.
-channel.queue_declare(queue='letterbox')
+channel.queue_declare(queue=queueBoard)
 
-channel.basic_consume(queue='letterbox', auto_ack=True, on_message_callback=on_message_recieve)
+# Now that we have our queue set up we can publish a message.
+# IMPORTANT NOTE!
+# We don't ever publish a message directly to a queue, we must use the exchange.
+# But to simplify we are going to use the default exchange
 
-print("Started consuming messages")
-
-channel.start_consuming()
+petID=0
+while (True):
+    message = f"Petition number: {petID}"
+    channel.basic_publish(exchange='', routing_key=queueBoard, body=message)
+    print("Message sent")
+    petID += 1
+    time.sleep(rd.randint(1,3))
