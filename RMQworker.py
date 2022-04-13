@@ -15,9 +15,13 @@ rmqHost='localhost'
 rmqPort=5672
 exchBoard="pubsub"
 
-def on_message_recieve(ch, method, properties, body):
-    print(f"Recieved new message: {body}")
-    ch.basic_ack(delivery_tag=method.delivery_tag) # Manual ack
+def on_request_message_recieve(ch, method, properties, body):
+    print("Recieved new message:",body, properties.correlation_id)
+    startTime=time.time()
+    time.sleep(0.5)
+    totalTime=str(time.time()-startTime)
+    reply = "10;;;;"+totalTime
+    ch.basic_publish('',routing_key=properties.reply_to, body=reply)
     print("Finished processing")
 
 connection_parameters = pk.ConnectionParameters(rmqHost,rmqPort)
@@ -37,7 +41,7 @@ channel.queue_bind(exchange=exchBoard, queue=queue.method.queue)
 
 # channel.basic_consume(queue=queueBoard, auto_ack=True, on_message_callback=on_message_recieve)
 # We must remove the auto_ack=True parameter as we need to ack manually when the task is finished
-channel.basic_consume(queue=queue.method.queue, on_message_callback=on_message_recieve)
+channel.basic_consume(queue=queue.method.queue, auto_ack=True, on_message_callback=on_request_message_recieve)
 
 print("Started consuming messages")
 
