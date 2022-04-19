@@ -3,14 +3,23 @@ import grpc
 # import the generated classes (client/server/master)
 import gRPC_servant_pb2_grpc
 import gRPC_servant_pb2
+import gRPC_master_pb2_grpc
+import gRPC_master_pb2
 
 # open a gRPC channel
-channel = grpc.insecure_channel('localhost:9000')
+channel = grpc.insecure_channel('localhost:8000')
 
 # create a stub (client), proxy
-stub = gRPC_servant_pb2_grpc.gRPC_servantStub(channel)
+stub = gRPC_master_pb2_grpc.gRPC_masterStub(channel)
+workers_list = list()
+workers_list[:] = stub.get_workers(gRPC_master_pb2.RequestMaster())
 
-stub.read_csv(gRPC_servant_pb2.Request(requestName="titanic.csv"))
-response = stub.max(gRPC_servant_pb2.Request(requestName="2"))
+for wk in workers_list:
+    print(wk)
+
+#print(stub.read_csv(gRPC_servant_pb2.Request(requestName="titanic.csv")))
+#response1 = stub.max(gRPC_servant_pb2.Request(requestName="PassengerId"))
+#response2 = stub.min(gRPC_servant_pb2.Request(requestName="PassengerId"))
 # et voilà
-print(response)
+#print(response1)
+#print(response2)

@@ -14,13 +14,13 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gRPC_master.proto\"\x1d\n\rListedServers\x12\x0c\n\x04list\x18\x01 \x03(\t\"\"\n\x0fReturnedMessage\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1e\n\x07Request\x12\x13\n\x0brequestName\x18\x01 \x01(\t2\x8f\x01\n\x0bgRPC_master\x12(\n\x08\x61\x64\x64_node\x12\x08.Request\x1a\x10.ReturnedMessage\"\x00\x12+\n\x0bremove_node\x12\x08.Request\x1a\x10.ReturnedMessage\"\x00\x12)\n\x0bget_workers\x12\x08.Request\x1a\x0e.ListedServers\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gRPC_master.proto\"$\n\rListedServers\x12\x13\n\x0blistWorkers\x18\x03 \x03(\t\"(\n\x0fReturnedMessage\x12\x15\n\rmessageMaster\x18\x01 \x01(\t\"*\n\rRequestMaster\x12\x19\n\x11requestNameMaster\x18\x01 \x01(\t2\xa1\x01\n\x0bgRPC_master\x12.\n\x08\x61\x64\x64_node\x12\x0e.RequestMaster\x1a\x10.ReturnedMessage\"\x00\x12\x31\n\x0bremove_node\x12\x0e.RequestMaster\x1a\x10.ReturnedMessage\"\x00\x12/\n\x0bget_workers\x12\x0e.RequestMaster\x1a\x0e.ListedServers\"\x00\x62\x06proto3')
 
 
 
 _LISTEDSERVERS = DESCRIPTOR.message_types_by_name['ListedServers']
 _RETURNEDMESSAGE = DESCRIPTOR.message_types_by_name['ReturnedMessage']
-_REQUEST = DESCRIPTOR.message_types_by_name['Request']
+_REQUESTMASTER = DESCRIPTOR.message_types_by_name['RequestMaster']
 ListedServers = _reflection.GeneratedProtocolMessageType('ListedServers', (_message.Message,), {
   'DESCRIPTOR' : _LISTEDSERVERS,
   '__module__' : 'gRPC_master_pb2'
@@ -35,23 +35,23 @@ ReturnedMessage = _reflection.GeneratedProtocolMessageType('ReturnedMessage', (_
   })
 _sym_db.RegisterMessage(ReturnedMessage)
 
-Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), {
-  'DESCRIPTOR' : _REQUEST,
+RequestMaster = _reflection.GeneratedProtocolMessageType('RequestMaster', (_message.Message,), {
+  'DESCRIPTOR' : _REQUESTMASTER,
   '__module__' : 'gRPC_master_pb2'
-  # @@protoc_insertion_point(class_scope:Request)
+  # @@protoc_insertion_point(class_scope:RequestMaster)
   })
-_sym_db.RegisterMessage(Request)
+_sym_db.RegisterMessage(RequestMaster)
 
 _GRPC_MASTER = DESCRIPTOR.services_by_name['gRPC_master']
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _LISTEDSERVERS._serialized_start=21
-  _LISTEDSERVERS._serialized_end=50
-  _RETURNEDMESSAGE._serialized_start=52
-  _RETURNEDMESSAGE._serialized_end=86
-  _REQUEST._serialized_start=88
-  _REQUEST._serialized_end=118
-  _GRPC_MASTER._serialized_start=121
-  _GRPC_MASTER._serialized_end=264
+  _LISTEDSERVERS._serialized_end=57
+  _RETURNEDMESSAGE._serialized_start=59
+  _RETURNEDMESSAGE._serialized_end=99
+  _REQUESTMASTER._serialized_start=101
+  _REQUESTMASTER._serialized_end=143
+  _GRPC_MASTER._serialized_start=146
+  _GRPC_MASTER._serialized_end=307
 # @@protoc_insertion_point(module_scope)

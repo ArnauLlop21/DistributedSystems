@@ -16,17 +16,17 @@ class gRPC_masterStub(object):
         """
         self.add_node = channel.unary_unary(
                 '/gRPC_master/add_node',
-                request_serializer=gRPC__master__pb2.Request.SerializeToString,
+                request_serializer=gRPC__master__pb2.RequestMaster.SerializeToString,
                 response_deserializer=gRPC__master__pb2.ReturnedMessage.FromString,
                 )
         self.remove_node = channel.unary_unary(
                 '/gRPC_master/remove_node',
-                request_serializer=gRPC__master__pb2.Request.SerializeToString,
+                request_serializer=gRPC__master__pb2.RequestMaster.SerializeToString,
                 response_deserializer=gRPC__master__pb2.ReturnedMessage.FromString,
                 )
         self.get_workers = channel.unary_unary(
                 '/gRPC_master/get_workers',
-                request_serializer=gRPC__master__pb2.Request.SerializeToString,
+                request_serializer=gRPC__master__pb2.RequestMaster.SerializeToString,
                 response_deserializer=gRPC__master__pb2.ListedServers.FromString,
                 )
 
@@ -57,17 +57,17 @@ def add_gRPC_masterServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'add_node': grpc.unary_unary_rpc_method_handler(
                     servicer.add_node,
-                    request_deserializer=gRPC__master__pb2.Request.FromString,
+                    request_deserializer=gRPC__master__pb2.RequestMaster.FromString,
                     response_serializer=gRPC__master__pb2.ReturnedMessage.SerializeToString,
             ),
             'remove_node': grpc.unary_unary_rpc_method_handler(
                     servicer.remove_node,
-                    request_deserializer=gRPC__master__pb2.Request.FromString,
+                    request_deserializer=gRPC__master__pb2.RequestMaster.FromString,
                     response_serializer=gRPC__master__pb2.ReturnedMessage.SerializeToString,
             ),
             'get_workers': grpc.unary_unary_rpc_method_handler(
                     servicer.get_workers,
-                    request_deserializer=gRPC__master__pb2.Request.FromString,
+                    request_deserializer=gRPC__master__pb2.RequestMaster.FromString,
                     response_serializer=gRPC__master__pb2.ListedServers.SerializeToString,
             ),
     }
@@ -92,7 +92,7 @@ class gRPC_master(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/gRPC_master/add_node',
-            gRPC__master__pb2.Request.SerializeToString,
+            gRPC__master__pb2.RequestMaster.SerializeToString,
             gRPC__master__pb2.ReturnedMessage.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -109,7 +109,7 @@ class gRPC_master(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/gRPC_master/remove_node',
-            gRPC__master__pb2.Request.SerializeToString,
+            gRPC__master__pb2.RequestMaster.SerializeToString,
             gRPC__master__pb2.ReturnedMessage.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -126,7 +126,7 @@ class gRPC_master(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/gRPC_master/get_workers',
-            gRPC__master__pb2.Request.SerializeToString,
+            gRPC__master__pb2.RequestMaster.SerializeToString,
             gRPC__master__pb2.ListedServers.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

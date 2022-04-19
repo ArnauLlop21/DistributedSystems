@@ -1,19 +1,19 @@
 syntax = "proto3";
 //python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./gRPC_master.proto
 message ListedServers {
-    repeated string list = 1;
+    repeated string listWorkers = 3;
 }
 
 message ReturnedMessage {
-    string message = 1;
+    string messageMaster = 1;
 }
 
-message Request {
-    string requestName = 1;
+message RequestMaster {
+    string requestNameMaster = 1;
 }
 
 service gRPC_master {
-    rpc add_node(Request) returns (ReturnedMessage) {}
-    rpc remove_node(Request) returns (ReturnedMessage) {}
-    rpc get_workers(Request) returns (ListedServers) {}
+    rpc add_node(RequestMaster) returns (ReturnedMessage) {}
+    rpc remove_node(RequestMaster) returns (ReturnedMessage) {}
+    rpc get_workers(RequestMaster) returns (ListedServers) {}
 }
