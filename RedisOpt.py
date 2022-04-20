@@ -2,11 +2,10 @@ def apply(df, cond):
     return str(df.apply(eval(cond)))
 
 def columns(df):
-    return str(df.columns())
+    return str(df.columns)
 
 def groupby(df, param):
-    par=list(param.split(","))
-    return df.groupby(eval(param)).agg['mean', 'count']
+    return str(df.groupby(param).agg(['mean', 'count']).values.tolist())
 
 def head(df, number):
     return str(df.head(number))

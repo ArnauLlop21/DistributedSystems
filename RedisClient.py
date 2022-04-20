@@ -9,6 +9,7 @@ pubsubC=master.pubsub()
 
 def client():
     petition="titanic.csv;max;Age;Client1"
+
     master.publish("Board" , petition)
     slaveCount=master.get("Workers")                # Get number of slaves connected to the system
     petitionTpl=tuple(map(str,petition.split(';'))) # String petition -> tuple petition. Allows for better info managing
