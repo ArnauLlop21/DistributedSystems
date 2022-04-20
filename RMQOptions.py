@@ -5,8 +5,8 @@ def columns(df):
     return df.columns
 
 def groupby(df, param):
-    par=list(param.split(","))
-    return df.groupby(eval(param)).agg['mean', 'count']
+    #par=list(param.split(","))
+    return df.groupby(param).agg(['mean', 'count']).values.tolist()
 
 def head(df, number):
     return df.head(number)

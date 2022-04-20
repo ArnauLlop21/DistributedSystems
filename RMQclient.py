@@ -1,6 +1,5 @@
 # RabbitMQ approach to server-client publish subscribe with reply request
 
-from email.base64mime import decodestring
 import pika as pk
 from pika.exchange_type import ExchangeType
 import uuid
@@ -23,7 +22,10 @@ timeCache=[]
 # If no parameter is needed leave the third field as "null"
 # message = "titanic.csv;head;5"
 # message = "titanic.csv;columns;null"
-message = "titanic.csv;columns;null"
+message ="titanic.csv;max;Age"
+
+
+
 
 # Connection configuration
 connection_parameters = pk.ConnectionParameters(rmqHost,rmqPort)
