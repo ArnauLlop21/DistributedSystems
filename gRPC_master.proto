@@ -1,7 +1,7 @@
 syntax = "proto3";
 //python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./gRPC_master.proto
 message ListedServers {
-    repeated string listWorkers = 3;
+    repeated string listWorkers = 1;
 }
 
 message ReturnedMessage {

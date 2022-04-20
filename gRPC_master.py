@@ -20,10 +20,10 @@ class gRPC_master(gRPC_master_pb2_grpc.gRPC_masterServicer):
         return gRPC_master_pb2.ReturnedMessage(messageMaster="node removed")
 
     def get_workers(self, request, context):
-        response = gRPC_master_pb2.ListedServers()
-        response.listWorkers[:] = self.workers_list
-        return response
-        #return gRPC_master_pb2.ListedServers(listWorkers=self.workers_list)
+        #response = gRPC_master_pb2.ListedServers()
+        #response.listWorkers[:] = self.workers_list
+        #return response
+        return gRPC_master_pb2.ListedServers(listWorkers=self.workers_list)
 
 # create a gRPC server
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

@@ -42,7 +42,7 @@ channel = grpc.insecure_channel('localhost:8000')
 # create a stub servant to master proxy
 stub = gRPC_master_pb2_grpc.gRPC_masterStub(channel)
 # add servant to master
-stub.add_node(gRPC_master_pb2.ReturnedMessage(messageMaster='[::]:'+str(port)))
+stub.add_node(gRPC_master_pb2.ReturnedMessage(messageMaster='localhost:'+str(port)))
 # -------
 
 # since server.start() will not block,
@@ -52,5 +52,5 @@ try:
         time.sleep(86400)
 except KeyboardInterrupt:
     # deleting servant from master
-    stub.remove_node(gRPC_master_pb2.RequestMaster(requestNameMaster='[::]:'+str(port)))
+    stub.remove_node(gRPC_master_pb2.RequestMaster(requestNameMaster='localhost:'+str(port)))
     server.stop(0)

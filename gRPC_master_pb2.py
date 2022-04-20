@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gRPC_master.proto\"$\n\rListedServers\x12\x13\n\x0blistWorkers\x18\x03 \x03(\t\"(\n\x0fReturnedMessage\x12\x15\n\rmessageMaster\x18\x01 \x01(\t\"*\n\rRequestMaster\x12\x19\n\x11requestNameMaster\x18\x01 \x01(\t2\xa1\x01\n\x0bgRPC_master\x12.\n\x08\x61\x64\x64_node\x12\x0e.RequestMaster\x1a\x10.ReturnedMessage\"\x00\x12\x31\n\x0bremove_node\x12\x0e.RequestMaster\x1a\x10.ReturnedMessage\"\x00\x12/\n\x0bget_workers\x12\x0e.RequestMaster\x1a\x0e.ListedServers\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gRPC_master.proto\"$\n\rListedServers\x12\x13\n\x0blistWorkers\x18\x01 \x03(\t\"(\n\x0fReturnedMessage\x12\x15\n\rmessageMaster\x18\x01 \x01(\t\"*\n\rRequestMaster\x12\x19\n\x11requestNameMaster\x18\x01 \x01(\t2\xa1\x01\n\x0bgRPC_master\x12.\n\x08\x61\x64\x64_node\x12\x0e.RequestMaster\x1a\x10.ReturnedMessage\"\x00\x12\x31\n\x0bremove_node\x12\x0e.RequestMaster\x1a\x10.ReturnedMessage\"\x00\x12/\n\x0bget_workers\x12\x0e.RequestMaster\x1a\x0e.ListedServers\"\x00\x62\x06proto3')
 
 
 
