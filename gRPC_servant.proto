@@ -1,0 +1,15 @@
+syntax = "proto3";
+//python -m grpc_tools.protoc -I./ --python_out=. --grpc_python_out=. ./gRPC_servant.proto
+message Result {
+    string message = 1;
+}
+
+message Request {
+    string requestName = 1;
+}
+
+service gRPC_servant {
+    rpc read_csv(Request) returns (Result) {}
+    rpc min(Request) returns (Result) {}
+    rpc max(Request) returns (Result) {}
+}
