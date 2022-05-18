@@ -56,21 +56,23 @@ class Client:
         aux=[]
         for current in self.proxies:
             aux.append(current.max(axis))
-        return aux
+        df = pd.DataFrame(aux);
+        return df[0].max()
     
     def min(self, axis):
         aux=[]
         for current in self.proxies:
             aux.append(current.min(axis))
-        return aux
+        df = pd.DataFrame(aux);
+        return df[0].min()
 #Main:
 client1 = Client()
-client1.read_csv("cities.csv")
+client1.read_csv("titanic.csv")
 print(client1.apply("lambda x: x + x"))
 print(client1.columns())
 print(client1.groupby(["PassengerId"]))
 print(client1.head(5))
 print(client1.isin([41, 80]))
 print(client1.items())
-print(client1.min("axis=0"))
-print(client1.max("LatD"))
+print(client1.min("PassengerId"))
+print(client1.max("PassengerId"))

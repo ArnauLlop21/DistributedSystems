@@ -5,6 +5,7 @@ import gRPC_servant_pb2_grpc
 import gRPC_servant_pb2
 import gRPC_master_pb2_grpc
 import gRPC_master_pb2
+import pandas as pd
 
 class Client:
 
@@ -30,14 +31,16 @@ class Client:
     def max(self, axis):
         aux=[]
         for current in self.proxies:
-            aux.append(current.max(gRPC_servant_pb2.Request(requestName=axis)))
-        return aux
+            aux.append(current.max(gRPC_servant_pb2.Request(requestName=axis)).message)
+        df = pd.DataFrame(aux);
+        return df[0].max()
     
     def min(self, axis):
         aux=[]
         for current in self.proxies:
-            aux.append(current.min(gRPC_servant_pb2.Request(requestName=axis)))
-        return aux
+            aux.append(current.min(gRPC_servant_pb2.Request(requestName=axis)).message)
+        df = pd.DataFrame(aux);
+        return df[0].min()
 #Main:
 client1 = Client()
 client1.read_csv("titanic.csv")

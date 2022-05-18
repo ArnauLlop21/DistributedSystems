@@ -7,7 +7,7 @@ import time
 import gRPC_servant_pb2_grpc
 import gRPC_servant_pb2
 
-port = 9001
+port = 9002
 
 class gRPC_servant(gRPC_servant_pb2_grpc.gRPC_servantServicer):
 
