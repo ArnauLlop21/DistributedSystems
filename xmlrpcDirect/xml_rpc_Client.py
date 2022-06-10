@@ -3,76 +3,121 @@ import pandas as pd
 
 class Client:
 
+    proxies = []
+
     def __init__(self):
-        master = ServerProxy('http://localhost:8000', allow_none=True)
-        workers_list = master.get_workers()
+        self.master = ServerProxy('http://localhost:8000', allow_none=True)
+        self.create_proxys()
+        self.master.reset_change()
+
+    def create_proxys(self):
+        workers_list = self.master.get_workers()
         # iterates over the list and appends workers to client
-        self.proxies = []
+        self.proxies.clear()
         for worker in workers_list:
             wk = ServerProxy(worker, allow_none=True)
             self.proxies.append(wk)
-    
-    def read_csv(self, name):
-        for current in self.proxies:
-            current.read_csv(name)
 
-    def apply(self, cond):
+    def apply(self, cond, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
+
         aux=[]
         for current in self.proxies:
-            aux.append(current.apply(str(cond)))
+            aux.append(current.apply(str(cond), file))
         return aux
 
-    def columns(self):
-        aux=[]
-        for current in self.proxies:
-            aux.append(current.columns())
-        return aux
-    
-    def groupby(self, by):
-        aux=[]
-        for current in self.proxies:
-            aux.append(current.groupby(by))
-        return aux
+    def columns(self, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
 
-    def head(self, n):
         aux=[]
         for current in self.proxies:
-            aux.append(current.head(n))
-        return aux
-
-    def isin(self, val):
-        aux=[]
-        for current in self.proxies:
-            aux.append(current.isin(val))
+            aux.append(current.columns(file))
         return aux
     
-    def items(self):
+    def groupby(self, by, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
+
         aux=[]
         for current in self.proxies:
-            aux.append(current.items())
+            aux.append(current.groupby(by, file))
         return aux
 
-    def max(self, axis):
+    def head(self, n, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
+
         aux=[]
         for current in self.proxies:
-            aux.append(current.max(axis))
+            aux.append(current.head(n, file))
+        return aux
+
+    def isin(self, val, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
+
+        aux=[]
+        for current in self.proxies:
+            aux.append(current.isin(val, file))
+        return aux
+    
+    def items(self, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
+
+        aux=[]
+        for current in self.proxies:
+            aux.append(current.items(file))
+        return aux
+
+    def max(self, axis, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
+
+        aux=[]
+        for current in self.proxies:
+            aux.append(current.max(axis, file))
         df = pd.DataFrame(aux);
         return df[0].max()
     
-    def min(self, axis):
+    def min(self, axis, file):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            self.create_proxys()
+            self.master.reset_change()
+
         aux=[]
         for current in self.proxies:
-            aux.append(current.min(axis))
+            aux.append(current.min(axis, file))
         df = pd.DataFrame(aux);
         return df[0].min()
 #Main:
 client1 = Client()
-client1.read_csv("titanic.csv")
-print(client1.apply("lambda x: x + x"))
-print(client1.columns())
-print(client1.groupby(["PassengerId"]))
-print(client1.head(5))
-print(client1.isin([41, 80]))
-print(client1.items())
-print(client1.min("PassengerId"))
-print(client1.max("PassengerId"))
+print(client1.proxies)
+print(client1.apply("lambda x: x + x", "titanic.csv"))
+print(client1.columns("titanic.csv"))
+input()
+print(client1.groupby(["PassengerId"], "titanic.csv"))
+print(client1.proxies)
+print(client1.head(5, "titanic.csv"))
+print(client1.head(5, "titanic.csv"))
+print(client1.isin([41, 80], "titanic.csv"))
+print(client1.items("titanic.csv"))
+print(client1.min("PassengerId", "titanic.csv"))
+print(client1.max("PassengerId", "titanic.csv"))

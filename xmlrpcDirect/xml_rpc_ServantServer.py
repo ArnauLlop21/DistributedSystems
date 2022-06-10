@@ -3,7 +3,7 @@ from xmlrpc.client import ServerProxy
 from xmlrpc.server import SimpleXMLRPCServer
 import pandas as pd
 
-port = 9001
+port = 9002
 
 # Set up logging
 worker = SimpleXMLRPCServer(('localhost', port), logRequests=True, allow_none=True)
@@ -11,37 +11,81 @@ logging.basicConfig(level=logging.INFO)
 
 master = ServerProxy('http://localhost:8000', allow_none=True)
 
+file_name = "null"
+
 # Functions
 def read_csv(file):
     global df
+    global file_name
+    file_name = file
     df = pd.read_csv(file)
 #func casting string to server -> eval()
-def apply(cond):
+def apply(cond, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     return df.apply(eval(cond)).values.tolist()
 
-def columns():
+def columns(file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     return df.columns.values.tolist()
 
-def groupby(by):
+def groupby(by, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     return df.groupby(by).agg(['mean', 'count']).values.tolist()
 
-def head(n):
+def head(n, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     return df.head(n).values.tolist()
 
-def isin(val):
+def isin(val, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     return df.isin(val).values.tolist()
 
-def items():
+def items(file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     aux=[]
     for label, content in df.items():
         aux.append(f'label:' + str(label))
         aux.append(f'content:' + str(content))
     return aux
 
-def max(axis):
+def max(axis, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     return str(df[axis].max())
 
-def min(axis):
+def min(axis, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
     return str(df[axis].min())
 
 worker.register_function(read_csv)
