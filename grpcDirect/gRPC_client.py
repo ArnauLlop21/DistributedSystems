@@ -14,13 +14,10 @@ class Client:
         channel = grpc.insecure_channel('localhost:8000')
         # create a stub client to master, proxy
         stub = gRPC_master_pb2_grpc.gRPC_masterStub(channel)
-        workers_list = str(stub.get_workers(gRPC_master_pb2.RequestMaster()))
-        splittedWorkers = workers_list.splitlines()
+        workers_list = stub.get_workers(gRPC_master_pb2.RequestMaster()).listWorkers
         self.proxies = []
-        for splitwk in splittedWorkers:
-            aux=splitwk.split(" ")
-            aux[1] = str(aux[1]).removeprefix('"').removesuffix('"')
-            channel = grpc.insecure_channel(aux[1])
+        for worker in workers_list:
+            channel = grpc.insecure_channel(worker)
             stub = gRPC_servant_pb2_grpc.gRPC_servantStub(channel)
             self.proxies.append(stub)
     
