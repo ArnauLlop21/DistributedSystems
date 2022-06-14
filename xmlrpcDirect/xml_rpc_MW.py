@@ -1,0 +1,203 @@
+#!/usr/bin/python
+from concurrent.futures import thread
+import logging
+import threading as thr
+import time
+import sys
+from socket import error as socketError
+from xmlrpc.server import SimpleXMLRPCServer
+from xmlrpc.client import ServerProxy
+import pandas as pd
+
+# params: 1/0 master/worker, port (8000, 900i)
+im_master = False
+master_port = 8000
+# Set up logging for master, if master does not exist
+if(sys.argv[1]=='0'):
+    master = ServerProxy('http://localhost:'+str(master_port), allow_none=True)
+    # Set up logging for Worker, if master exists
+    server = SimpleXMLRPCServer(('localhost', int(sys.argv[2])), logRequests=True, allow_none=True)
+    logging.basicConfig(level=logging.INFO)
+if(sys.argv[1]=='1'):
+    server = SimpleXMLRPCServer(('localhost', master_port), logRequests=True, allow_none=True)
+    im_master = True
+    logging.basicConfig(level=logging.INFO)
+
+workers_list = list()
+worker_proxy = {}
+change = False #Global: https://www.w3schools.com/python/python_variables_global.asp
+
+file_name = "null"
+
+# Functions Master
+def set_lists(w_list):
+    global workers_list, worker_proxy
+    workers_list = w_list.copy()
+    #worker_proxy.copy(w_proxy)
+
+def add_node(node):
+    global change, workers_list, worker_proxy
+    change = True
+    workers_list.append(node)
+    # Broadcast add_node -> setter for list and dictionary
+    for worker in workers_list:
+        proxy_current_wk = ServerProxy(worker, allow_none=True)
+        proxy_current_wk.set_lists(workers_list)
+
+def remove_node(node):
+    global change, workers_list, worker_proxy
+    change = True
+    workers_list.remove(node)
+    # Broadcast remove_node -> setter for list and dictionary
+    for worker in workers_list:
+        proxy_current_wk = ServerProxy(worker, allow_none=True)
+        proxy_current_wk.set_lists(workers_list)
+
+def get_workers():
+    return workers_list
+
+def get_has_changed():
+    return change
+
+def reset_change():
+    global change
+    change = False
+
+def check_workers():
+    global change
+    for worker in workers_list:
+        try:
+            ServerProxy(worker, allow_none=True).still_alive()
+        except socketError:
+            change = True
+            remove_node(worker)
+    time.sleep(0.1)
+
+# Functions Workers
+def read_csv(file):
+    global df
+    global file_name
+    file_name = file
+    df = pd.read_csv(file)
+#func casting string to server -> eval()
+def apply(cond, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    return df.apply(eval(cond)).values.tolist()
+
+def columns(file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    return df.columns.values.tolist()
+
+def groupby(by, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    return df.groupby(by).agg(['mean', 'count']).values.tolist()
+
+def head(n, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    return df.head(n).values.tolist()
+
+def isin(val, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    return df.isin(val).values.tolist()
+
+def items(file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    aux=[]
+    for label, content in df.items():
+        aux.append(f'label:' + str(label))
+        aux.append(f'content:' + str(content))
+    return aux
+
+def max(axis, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    return str(df[axis].max())
+
+def min(axis, file):
+    global df
+    global file_name
+    if(file != file_name):
+        file_name = file
+        df = pd.read_csv(file)
+    return str(df[axis].min())
+
+def still_alive():
+    return True
+
+def check_master():
+    global im_master, master_port
+        #get current master using redis TODO
+    try:
+        #checks if current master is alive
+        ServerProxy('http://localhost:'+str(master_port), allow_none=True).get_has_changed()
+    except socketError:
+            #change first worker to master TODO
+        pass
+    time.sleep(0.1)
+
+
+server.register_function(add_node)
+server.register_function(remove_node)
+server.register_function(get_workers)
+#Adding Consistency
+server.register_function(set_lists)
+server.register_function(get_has_changed)
+server.register_function(reset_change)
+server.register_function(check_workers)
+
+#Register Workers Functions
+server.register_function(read_csv)
+server.register_function(apply)
+server.register_function(columns)
+server.register_function(groupby)
+server.register_function(head)
+server.register_function(isin)
+server.register_function(items)
+server.register_function(max)
+server.register_function(min)
+server.register_function(still_alive)
+
+# Start the server
+try:
+    #Thread to start the server
+    thread_serve = thr.Thread(target = server.serve_forever, daemon=True)
+    thread_serve.start()
+    
+    if(sys.argv[1]=='0'):# Adds worker to master
+        master.add_node('http://localhost:'+sys.argv[2])
+    
+    print('Use Ctrl+c to exit')
+    while(True):
+        if(im_master):# If we are Master, do master job -> check if workers still alive
+            check_workers()
+        else:# We are not master, so we do workers job -> check if master still alive
+            pass
+except KeyboardInterrupt:
+    print('Exiting')

@@ -1,9 +1,10 @@
 import logging
+import sys
 from xmlrpc.client import ServerProxy
 from xmlrpc.server import SimpleXMLRPCServer
 import pandas as pd
 
-port = 9002
+port = 9001
 
 # Set up logging
 worker = SimpleXMLRPCServer(('localhost', port), logRequests=True, allow_none=True)
@@ -88,6 +89,10 @@ def min(axis, file):
         df = pd.read_csv(file)
     return str(df[axis].min())
 
+def still_alive():
+    return True
+
+#Check if master still alive
 worker.register_function(read_csv)
 worker.register_function(apply)
 worker.register_function(columns)
@@ -97,6 +102,7 @@ worker.register_function(isin)
 worker.register_function(items)
 worker.register_function(max)
 worker.register_function(min)
+worker.register_function(still_alive)
 
 # Start the server
 try:
