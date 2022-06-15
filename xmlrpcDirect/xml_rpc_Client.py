@@ -1,15 +1,32 @@
+from doctest import master
 from xmlrpc.client import ServerProxy
 import pandas as pd
 from socket import error as socketError
+import redis
+
+# Redis implementation
+redis_host = 'localhost'
+redis_port = 6379
+
+r = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
 
 class Client:
 
     proxies = []
-
+    masterP = r.get("master")
     def __init__(self):
-        self.master = ServerProxy('http://localhost:8000', allow_none=True)
+        self.master = ServerProxy('http://localhost:'+str(r.get("master")), allow_none=True)
         self.create_proxys()
         self.master.reset_change()
+
+    def check_master_changed(self):
+        #Maintain consistency
+        if(self.master.get_has_changed()):
+            if(r.get("master") != self.masterP):
+                self.masterP = r.get("master")
+                self.master = ServerProxy('http://localhost:'+str(r.get("master")), allow_none=True)
+            self.create_proxys()
+            self.master.reset_change()
 
     def create_proxys(self):
         workers_list = self.master.get_workers()
@@ -20,10 +37,7 @@ class Client:
             self.proxies.append(wk)
 
     def apply(self, cond, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does apply, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -34,10 +48,7 @@ class Client:
         return aux
 
     def columns(self, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does columns, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -48,10 +59,7 @@ class Client:
         return aux
     
     def groupby(self, by, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does groupby, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -62,10 +70,7 @@ class Client:
         return aux
 
     def head(self, n, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does head, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -76,10 +81,7 @@ class Client:
         return aux
 
     def isin(self, val, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does isin, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -90,10 +92,7 @@ class Client:
         return aux
     
     def items(self, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does items, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -104,10 +103,7 @@ class Client:
         return aux
 
     def max(self, axis, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does max, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -119,10 +115,7 @@ class Client:
         return df[0].max()
     
     def min(self, axis, file):
-        #Maintain consistency
-        if(self.master.get_has_changed()):
-            self.create_proxys()
-            self.master.reset_change()
+        self.check_master_changed()
         #Loops through the current proxies and does min, if client is not able to stablish connection returns an error code.
         aux=[]
         for current in self.proxies:
@@ -132,11 +125,12 @@ class Client:
                 aux.append("Cannot communicate to: " + str(current))
         df = pd.DataFrame(aux);
         return df[0].min()
-#Main:
-#client1 = Client()
-#print(client1.proxies)
-'''
-print(client1.apply("lambda x: x + x", "titanic.csv"))
+
+# Main
+client1 = Client()
+print(client1.proxies)
+print(client1.master)
+""" print(client1.apply("lambda x: x + x", "titanic.csv"))
 print(client1.columns("titanic.csv"))
 input()
 print(client1.groupby(["PassengerId"], "titanic.csv"))
@@ -145,16 +139,6 @@ print(client1.head(5, "titanic.csv"))
 print(client1.head(5, "titanic.csv"))
 print(client1.isin([41, 80], "titanic.csv"))
 print(client1.items("titanic.csv"))
-print(client1.min("PassengerId", "titanic.csv"))
+print(client1.min("PassengerId", "titanic.csv") """
 print(client1.max("PassengerId", "titanic.csv"))
-'''
 
-#print(client1.min("PassengerId", "titanic.csv"))
-
-master = ServerProxy('http://localhost:8000', allow_none=True)
-print(master.get_workers())
-print(master.isin([41, 80], "titanic.csv"))
-print(master.items("titanic.csv"))
-print(master.min("PassengerId", "titanic.csv"))
-print(master.max("PassengerId", "titanic.csv"))
-print(master.get_workers())

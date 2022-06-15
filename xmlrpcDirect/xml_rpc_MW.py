@@ -8,18 +8,29 @@ from socket import error as socketError
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.client import ServerProxy
 import pandas as pd
+import redis
+
+# Redis implementation
+redis_host = 'localhost'
+redis_port = 6379
+
+r = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
 
 # params: 1/0 master/worker, port (8000, 900i)
 im_master = False
-master_port = 8000
+
 # Set up logging for master, if master does not exist
 if(sys.argv[1]=='0'):
+    master_port = r.get("master")
     master = ServerProxy('http://localhost:'+str(master_port), allow_none=True)
     # Set up logging for Worker, if master exists
     server = SimpleXMLRPCServer(('localhost', int(sys.argv[2])), logRequests=True, allow_none=True)
     logging.basicConfig(level=logging.INFO)
 if(sys.argv[1]=='1'):
-    server = SimpleXMLRPCServer(('localhost', master_port), logRequests=True, allow_none=True)
+    # Inicialization of redis Master register
+    r.set("master_being_changed" , str(False))
+    r.set("master" , int(8000))
+    server = SimpleXMLRPCServer(('localhost', int(r.get("master"))), logRequests=True, allow_none=True)
     im_master = True
     logging.basicConfig(level=logging.INFO)
 
@@ -74,6 +85,14 @@ def check_workers():
     time.sleep(0.1)
 
 # Functions Workers
+def turn_into_master(node):
+    global im_master, master_port, change
+    im_master = True
+    change = True
+    master_port = server.server_address[1] 
+    r.set("master" , master_port)
+    remove_node(node)
+
 def read_csv(file):
     global df
     global file_name
@@ -153,19 +172,32 @@ def still_alive():
 
 def check_master():
     global im_master, master_port
-        #get current master using redis TODO
+        #get current master using redis
+    master_port = r.get("master")
     try:
         #checks if current master is alive
         ServerProxy('http://localhost:'+str(master_port), allow_none=True).get_has_changed()
     except socketError:
-            #change first worker to master TODO
-        pass
+        #change first worker to master
+        if(r.get("master_being_changed") == "False"):
+            r.set("master_being_changed" , str(True))
+            print("Master has failed us!")
+            print("The worker "+str(workers_list[0])+" has been set to master")
+            print("Luke, I am your master")
+            turn_into_master("http://localhost:"+str(server.server_address[1]))
+            print("Correctly set")
+            r.set("master_being_changed" , str(False))
+        else:
+            print("The change is being managed by another slave")
+        
     time.sleep(0.1)
 
 
 server.register_function(add_node)
 server.register_function(remove_node)
 server.register_function(get_workers)
+server.register_function(turn_into_master)
+
 #Adding Consistency
 server.register_function(set_lists)
 server.register_function(get_has_changed)
@@ -198,6 +230,6 @@ try:
         if(im_master):# If we are Master, do master job -> check if workers still alive
             check_workers()
         else:# We are not master, so we do workers job -> check if master still alive
-            pass
+            check_master()
 except KeyboardInterrupt:
     print('Exiting')
