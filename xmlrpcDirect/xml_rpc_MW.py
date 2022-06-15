@@ -16,7 +16,6 @@ redis_port = 6379
 
 r = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
 
-# params: 1/0 master/worker, port (8000, 900i)
 im_master = False
 
 # Set up logging for master, if master does not exist
@@ -181,7 +180,7 @@ def check_master():
         #change first worker to master
         if(r.get("master_being_changed") == "False"):
             r.set("master_being_changed" , str(True))
-            print("Master has failed us!")
+            print("Father has failed us!")
             print("The worker "+str(workers_list[0])+" has been set to master")
             print("Luke, I am your master")
             turn_into_master("http://localhost:"+str(server.server_address[1]))
