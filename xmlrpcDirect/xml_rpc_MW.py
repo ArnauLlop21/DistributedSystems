@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from concurrent.futures import thread
 import logging
+import random
 import threading as thr
 import time
 import sys
@@ -17,6 +18,7 @@ redis_port = 6379
 r = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
 
 im_master = False
+bullId = 0
 
 # Set up logging for master, if master does not exist
 if(sys.argv[1]=='0'):
@@ -25,6 +27,8 @@ if(sys.argv[1]=='0'):
     # Set up logging for Worker, if master exists
     server = SimpleXMLRPCServer(('localhost', int(sys.argv[2])), logRequests=True, allow_none=True)
     logging.basicConfig(level=logging.INFO)
+    bullId = random.randint(0, sys.maxsize)
+    print(bullId)
 if(sys.argv[1]=='1'):
     # Inicialization of redis Master register
     r.set("master_being_changed" , str(False))
@@ -90,7 +94,24 @@ def turn_into_master(node):
     change = True
     master_port = server.server_address[1] 
     r.set("master" , master_port)
+    print("Luke, I am your master")
     remove_node(node)
+
+def should_we_bully_you():
+    global bullId
+    return bullId
+
+def lets_decide_who_to_bully():
+    global workers_list
+    minimumBull = [sys.maxsize, 0]
+    for worker in workers_list:
+        try:
+            proxy = [ServerProxy(worker, allow_none=True).should_we_bully_you() , worker]
+            if proxy[0] < minimumBull[0]: 
+                minimumBull = proxy
+        except socketError:
+            print("Something has gone kaboom xd")
+    return minimumBull[1]
 
 def read_csv(file):
     global df
@@ -180,10 +201,10 @@ def check_master():
         #change first worker to master
         if(r.get("master_being_changed") == "False"):
             r.set("master_being_changed" , str(True))
+            workerToBeBullied = lets_decide_who_to_bully()
             print("Father has failed us!")
-            print("The worker "+str(workers_list[0])+" has been set to master")
-            print("Luke, I am your master")
-            turn_into_master("http://localhost:"+str(server.server_address[1]))
+            print("The worker "+str(workerToBeBullied)+" has been set to master")
+            turn_into_master(str(workerToBeBullied))
             print("Correctly set")
             r.set("master_being_changed" , str(False))
         else:
@@ -214,6 +235,7 @@ server.register_function(items)
 server.register_function(max)
 server.register_function(min)
 server.register_function(still_alive)
+server.register_function(should_we_bully_you)
 
 # Start the server
 try:
