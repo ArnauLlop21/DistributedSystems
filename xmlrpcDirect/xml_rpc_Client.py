@@ -9,32 +9,39 @@ import time
 redis_host = 'localhost'
 redis_port = 6379
 
-r = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
-
 class Client:
 
+    # Current workers list
     proxies = []
+    # Redis instance
+    r = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
+    # Gets current master
     masterP = r.get("master")
+    
+    # Inits master and workers list
     def __init__(self):
         self.master = ServerProxy('http://localhost:'+str(self.masterP), allow_none=True)
         self.create_proxys()
         self.master.reset_change()
-
+    
+    # Checks if master or workers list has changed, makes sure thre's consistency and fault tolerance
     def check_master_changed(self):
-        #Maintain consistency
-        messageIter = 0                                     # This variable only prevents the console from flooding
-        while (r.get("master_being_changed") == "True"):
+        messageIter = 0     # This variable only prevents the console from flooding
+        # Prevents the client form communicatin to the old master 
+        while (self.r.get("master_being_changed") == "True"):
             if (messageIter==0):
                 print("The master is being changed.\nPlease, await so the operation can be carried away safely")
             if (messageIter%10 == 0):
                 print("Wait a little bit more, please.\nWe're working on it!")
             messageIter+=1
             time.sleep(0.2)
-
-        if(str(r.get("master")) != str(self.masterP)):      # If the port of the master has changed then
-            print("Previous master was "+str(self.masterP)+"\nNew master is "+str(r.get("master")))
-            self.masterP = r.get("master")
+        
+        # Changes master if needed
+        if(str(self.r.get("master")) != str(self.masterP)):      # If the port of the master has changed then
+            print("Previous master was "+str(self.masterP)+"\nNew master is "+str(self.r.get("master")))
+            self.masterP = self.r.get("master")
             self.master = ServerProxy('http://localhost:'+str(self.masterP), allow_none=True)
+        # Changes workers list if needed
         if(self.master.get_has_changed()):
             self.create_proxys()
             self.master.reset_change()
@@ -112,22 +119,3 @@ class Client:
             aux.append(current.min(axis, file))
         df = pd.DataFrame(aux);
         return df[0].min()
-
-# Main
-client1 = Client()
-print(client1.proxies)
-print(client1.master)
-"""
-print(client1.apply("lambda x: x + x", "titanic.csv"))
-print(client1.columns("titanic.csv"))
-input()
-print(client1.groupby(["PassengerId"], "titanic.csv"))
-print(client1.proxies)
-print(client1.head(5, "titanic.csv"))
-print(client1.head(5, "titanic.csv"))
-print(client1.isin([41, 80], "titanic.csv"))
-print(client1.items("titanic.csv"))"""
-print(client1.min("PassengerId", "titanic.csv"))
-time.sleep(5)                                                   # Sleep time to be able to test the master fault tolerance
-print(client1.max("PassengerId", "titanic.csv"))
-

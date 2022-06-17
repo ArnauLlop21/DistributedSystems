@@ -38,19 +38,17 @@ if(sys.argv[1]=='1'):
     logging.basicConfig(level=logging.INFO)
 
 workers_list = list()
-worker_proxy = {}
 change = False #Global: https://www.w3schools.com/python/python_variables_global.asp
 
 file_name = "null"
 
 # Functions Master
 def set_lists(w_list):
-    global workers_list, worker_proxy
+    global workers_list
     workers_list = w_list.copy()
-    #worker_proxy.copy(w_proxy)
 
 def add_node(node):
-    global change, workers_list, worker_proxy
+    global change, workers_list
     change = True
     workers_list.append(node)
     # Broadcast add_node -> setter for list and dictionary
@@ -59,7 +57,7 @@ def add_node(node):
         proxy_current_wk.set_lists(workers_list)
 
 def remove_node(node):
-    global change, workers_list, worker_proxy
+    global change, workers_list
     change = True
     workers_list.remove(node)
     # Broadcast remove_node -> setter for list and dictionary
@@ -97,6 +95,7 @@ def turn_into_master(node):
     print("Luke, I am your master")
     remove_node(node)
 
+#----- Bully protocol
 def should_we_bully_you():
     global bullId
     return bullId
@@ -112,13 +111,14 @@ def lets_decide_who_to_bully():
         except socketError:
             print("Something has gone kaboom xd")
     return minimumBull[1]
+#-----
 
 def read_csv(file):
     global df
     global file_name
     file_name = file
     df = pd.read_csv(file)
-#func casting string to server -> eval()
+
 def apply(cond, file):
     global df
     global file_name
@@ -212,7 +212,7 @@ def check_master():
         
     time.sleep(0.1)
 
-
+#Register Master Functions
 server.register_function(add_node)
 server.register_function(remove_node)
 server.register_function(get_workers)
